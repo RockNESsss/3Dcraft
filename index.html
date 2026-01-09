@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>3D Craft | PLA Printing & Design</title>
+    
+    <link rel="icon" href="logo.png" type="image/png">
+
     <style>
         /* --- НАЛАШТУВАННЯ --- */
         :root {
@@ -13,6 +16,7 @@
             --text-secondary: #a0a0a0;
             --accent: #3b82f6;
             --accent-hot: #60a5fa;
+            --retro-pink: #ff00ff; /* Додав трохи ретро-рожевого для музики */
         }
 
         html { scroll-behavior: smooth; }
@@ -20,7 +24,7 @@
         * {
             margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
-            -webkit-tap-highlight-color: transparent; /* Прибирає синій квадрат при натисканні на мобільному */
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -34,6 +38,71 @@
 
         a { text-decoration: none; color: inherit; transition: 0.3s; }
         ul { list-style: none; }
+
+        /* =========================================
+           МУЗИЧНИЙ ПЛЕЄР (РЕТРОВЕЙВ СТИЛЬ)
+        ========================================= */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(5px);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .music-player:hover {
+            border-color: var(--retro-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+
+        .music-text {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #fff;
+        }
+
+        /* Еквалайзер (анімовані смужки) */
+        .equalizer {
+            display: flex;
+            gap: 3px;
+            height: 15px;
+            align-items: flex-end;
+        }
+
+        .bar-eq {
+            width: 3px;
+            background-color: var(--accent);
+            height: 5px;
+            transition: 0.2s;
+        }
+
+        /* Анімація, коли музика грає */
+        .music-player.playing .bar-eq {
+            background-color: var(--retro-pink);
+            animation: equalizer-dance 0.5s infinite ease-in-out alternate;
+        }
+        
+        .music-player.playing .bar-eq:nth-child(1) { animation-delay: 0s; }
+        .music-player.playing .bar-eq:nth-child(2) { animation-delay: 0.2s; }
+        .music-player.playing .bar-eq:nth-child(3) { animation-delay: 0.4s; }
+        .music-player.playing .bar-eq:nth-child(4) { animation-delay: 0.1s; }
+
+        @keyframes equalizer-dance {
+            0% { height: 3px; }
+            100% { height: 15px; }
+        }
 
         /* =========================================
            АНІМАЦІЯ "МЕТЕОР"
@@ -109,18 +178,23 @@
         ========================================= */
         nav {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 20px 5%; position: fixed; width: 100%;
+            padding: 10px 5%; position: fixed; width: 100%;
             background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px);
             z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
-            height: 70px;
+            height: 80px;
         }
-        .logo { font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: 1px; z-index: 1002; }
-        
+
+        .logo-container { display: flex; align-items: center; z-index: 1002; }
+        .logo-img {
+            height: 55px; width: auto; transition: all 0.4s ease;
+            filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.3)); 
+        }
+        .logo-img:hover { transform: scale(1.1); filter: drop-shadow(0 0 10px var(--accent)); }
+
         .nav-links { display: flex; align-items: center; }
         .nav-links a { margin-left: 30px; font-size: 0.9rem; color: var(--text-secondary); }
         .nav-links a:hover { color: #fff; text-shadow: 0 0 10px var(--accent); }
 
-        /* БУРГЕР МЕНЮ (Сховане на ПК) */
         .hamburger { display: none; cursor: pointer; z-index: 1002; }
         .bar { display: block; width: 25px; height: 3px; margin: 5px auto; background-color: #fff; transition: all 0.3s ease-in-out; }
 
@@ -194,50 +268,50 @@
         }
         .contact-links a:hover { border-color: var(--accent); color: #fff; background: var(--accent); }
 
-        /* =========================================
-           МОБІЛЬНА АДАПТАЦІЯ (Media Queries)
-        ========================================= */
         @media (max-width: 768px) {
-            /* Меню для мобільного */
             .hamburger { display: block; }
             .hamburger.active .bar:nth-child(2) { opacity: 0; }
             .hamburger.active .bar:nth-child(1) { transform: translateY(8px) rotate(45deg); }
             .hamburger.active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
             .nav-links {
-                position: fixed; left: -100%; top: 70px; gap: 0;
+                position: fixed; left: -100%; top: 80px; gap: 0;
                 flex-direction: column; background-color: #111;
-                width: 100%; height: calc(100vh - 70px); /* Висота мінус хедер */
+                width: 100%; height: calc(100vh - 80px);
                 text-align: center; transition: 0.3s;
                 padding-top: 50px; border-top: 1px solid #333;
             }
-            
             .nav-links.active { left: 0; }
             .nav-links a { margin: 25px 0; font-size: 1.5rem; display: block; }
 
-            /* Герой */
             .hero h1 { font-size: 2.5rem; padding: 0 10px; }
             .hero p { padding: 0 20px; font-size: 1rem; }
-
-            /* Секції */
             section { padding: 60px 5%; }
             .section-title { font-size: 2rem; margin-bottom: 30px; }
-            
-            /* Фільтри */
             .filter-container { gap: 10px; }
             .filter-btn { padding: 10px 20px; font-size: 0.9rem; flex-grow: 1; }
-
-            /* Картки */
-            .grid { grid-template-columns: 1fr; gap: 25px; } /* Одна колонка */
+            .grid { grid-template-columns: 1fr; gap: 25px; }
             .card-img { height: 250px; }
-            
-            /* Футер */
             .contact-links { display: flex; flex-direction: column; padding: 0 40px; }
             .contact-links a { margin: 5px 0; text-align: center; width: 100%; }
         }
     </style>
 </head>
 <body>
+
+    <audio id="bg-music" loop>
+        <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="music-player" onclick="toggleMusic()">
+        <div class="equalizer">
+            <div class="bar-eq"></div>
+            <div class="bar-eq"></div>
+            <div class="bar-eq"></div>
+            <div class="bar-eq"></div>
+        </div>
+        <span class="music-text" id="music-text">Play Music</span>
+    </div>
 
     <div id="intro-scene">
         <div class="impact-container">
@@ -251,7 +325,9 @@
     </div>
 
     <nav>
-        <div class="logo">3D CRAFT</div>
+        <a href="#" class="logo-container">
+            <img src="logo.png" alt="3D Craft Logo" class="logo-img">
+        </a>
         
         <div class="hamburger" onclick="toggleMenu()">
             <span class="bar"></span>
@@ -353,7 +429,6 @@
     </footer>
 
     <script>
-        // СКРИПТ ДЛЯ МЕНЮ
         function toggleMenu() {
             const menu = document.querySelector(".nav-links");
             const icon = document.querySelector(".hamburger");
@@ -361,7 +436,23 @@
             icon.classList.toggle("active");
         }
 
-        // АВТОМАТИЧНИЙ ЗАПУСК
+        // Керування музикою
+        function toggleMusic() {
+            const music = document.getElementById("bg-music");
+            const player = document.querySelector(".music-player");
+            const text = document.getElementById("music-text");
+
+            if (music.paused) {
+                music.play();
+                player.classList.add("playing");
+                text.innerText = "Playing...";
+            } else {
+                music.pause();
+                player.classList.remove("playing");
+                text.innerText = "Play Music";
+            }
+        }
+
         document.addEventListener("DOMContentLoaded", function() {
             const introScene = document.getElementById('intro-scene');
             const body = document.body;
@@ -378,7 +469,6 @@
             }, 2500);
         });
 
-        // Фільтрація
         function filterSelection(category) {
             var cards = document.getElementsByClassName("card");
             if (category == "all") category = "";
@@ -392,6 +482,5 @@
         }
     </script>
 </body>
-
 </html>
 
