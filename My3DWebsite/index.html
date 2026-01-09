@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Craft | PLA Printing & Design</title>
+    <style>
+        /* --- НАЛАШТУВАННЯ --- */
+        :root {
+            --bg-color: #0a0a0a;
+            --card-bg: #1e1e1e;
+            --text-main: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent: #3b82f6;
+            --accent-hot: #60a5fa;
+        }
+
+        html { scroll-behavior: smooth; }
+        
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow: hidden; /* Скрол заблоковано поки йде анімація */
+        }
+        
+        body.loaded { overflow-y: auto; } /* Дозволяємо скрол */
+
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        ul { list-style: none; }
+
+        /* =========================================
+           АНІМАЦІЯ "МЕТЕОР"
+        ========================================= */
+        #intro-scene {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            overflow: hidden;
+            transition: opacity 0.5s ease-out;
+        }
+
+        /* Цей клас повністю прибирає заставку */
+        #intro-scene.hide {
+            opacity: 0;
+            visibility: hidden;
+            display: none !important; /* Гарантоване приховання */
+        }
+
+        .impact-container {
+            position: relative;
+            width: 200px; height: 200px;
+            display: flex; justify-content: center; align-items: center;
+            transform-style: preserve-3d;
+            animation: meteor-fall 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+
+        .meteor-cube {
+            width: 60px; height: 60px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: meteor-spin 1.5s linear forwards;
+        }
+
+        .m-face {
+            position: absolute; width: 60px; height: 60px;
+            background: rgba(59, 130, 246, 0.2);
+            border: 2px solid var(--accent-hot);
+            box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), inset 0 0 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .mf-front  { transform: translateZ(30px); }
+        .mf-back   { transform: rotateY(180deg) translateZ(30px); }
+        .mf-right  { transform: rotateY(90deg) translateZ(30px); }
+        .mf-left   { transform: rotateY(-90deg) translateZ(30px); }
+        .mf-top    { transform: rotateX(90deg) translateZ(30px); }
+        .mf-bottom { transform: rotateX(-90deg) translateZ(30px); }
+
+        .shockwave {
+            position: absolute;
+            width: 20px; height: 20px;
+            background: transparent;
+            border: 5px solid var(--accent-hot);
+            border-radius: 50%;
+            opacity: 0;
+            transform: rotateX(70deg) translateZ(-50px);
+            animation: shockwave-expand 1s ease-out 1.3s forwards;
+        }
+
+        @keyframes meteor-fall {
+            0% { transform: translateY(-800px) scale(0.5); opacity: 0; }
+            80% { transform: translateY(0) scale(1); opacity: 1; }
+            90% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes meteor-spin {
+            0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
+            100% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg); }
+        }
+
+        @keyframes shockwave-expand {
+            0% { width: 20px; height: 20px; opacity: 1; border-width: 5px; }
+            100% { width: 500px; height: 500px; opacity: 0; border-width: 20px; }
+        }
+
+        .shake-screen { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both 1.3s; }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-2px, 0, 0); }
+            20%, 80% { transform: translate3d(4px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
+            40%, 60% { transform: translate3d(6px, 0, 0); }
+        }
+
+        /* =========================================
+           ОСНОВНИЙ САЙТ
+        ========================================= */
+        nav {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 20px 5%; position: fixed; width: 100%;
+            background: rgba(10, 10, 10, 0.9); backdrop-filter: blur(10px);
+            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--accent); letter-spacing: 1px; }
+        .nav-links a { margin-left: 30px; font-size: 0.9rem; color: var(--text-secondary); }
+        .nav-links a:hover { color: #fff; text-shadow: 0 0 10px var(--accent); }
+
+        .hero {
+            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 80%); padding: 0 20px;
+        }
+        .hero h1 {
+            font-size: 4rem; margin-bottom: 20px;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            opacity: 0;
+        }
+        .hero p {
+            font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin-bottom: 40px; opacity: 0;
+        }
+        .btn-group { opacity: 0; }
+
+        .content-reveal .hero h1 { animation: fadeUp 1s ease forwards 0.2s; }
+        .content-reveal .hero p { animation: fadeUp 1s ease forwards 0.5s; }
+        .content-reveal .btn-group { animation: fadeUp 1s ease forwards 0.8s; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn {
+            padding: 12px 35px; background-color: var(--accent); color: white;
+            border-radius: 30px; font-weight: 600; cursor: pointer; border: none;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); transition: 0.3s;
+        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 0 30px var(--accent-hot); }
+        
+        section { padding: 100px 5%; }
+        .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 40px; color: #fff; }
+        
+        .filter-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 50px; flex-wrap: wrap; }
+        .filter-btn {
+            background: transparent; border: 1px solid #333; color: var(--text-secondary);
+            padding: 8px 25px; border-radius: 20px; cursor: pointer; transition: 0.3s; font-size: 1rem;
+        }
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .card {
+            background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; transition: 0.4s;
+            opacity: 1; transform: scale(1);
+        }
+        .card.hide { display: none; }
+        .card:hover { border-color: var(--accent); transform: translateY(-5px); }
+        .card-img { height: 220px; background: #222; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .card-img img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .card:hover .card-img img { transform: scale(1.1); }
+        .card-content { padding: 20px; }
+        .card-cat { font-size: 0.8rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
+        .card-title { font-size: 1.2rem; color: #fff; margin-bottom: 10px; }
+        .card-price { font-size: 1.1rem; font-weight: bold; color: #fff; float: right; }
+        
+        .services-grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
+        .service-item {
+            flex: 1 1 300px; background: #1a1a1a; padding: 40px; border-radius: 15px;
+            text-align: center; border-bottom: 3px solid transparent; transition: 0.3s;
+        }
+        .service-item:hover { border-bottom-color: var(--accent); background: #222; }
+        .service-icon { font-size: 2rem; color: var(--accent); margin-bottom: 20px; }
+
+        .footer { background: #050505; padding: 50px 5%; text-align: center; border-top: 1px solid #222; }
+        .contact-links a {
+            display: inline-block; margin: 10px; padding: 10px 25px;
+            border: 1px solid #333; border-radius: 50px; color: #aaa;
+        }
+        .contact-links a:hover { border-color: var(--accent); color: #fff; background: var(--accent); }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2.5rem; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-scene">
+        <div class="impact-container">
+            <div class="meteor-cube">
+                <div class="m-face mf-front"></div><div class="m-face mf-back"></div>
+                <div class="m-face mf-right"></div><div class="m-face mf-left"></div>
+                <div class="m-face mf-top"></div><div class="m-face mf-bottom"></div>
+            </div>
+            <div class="shockwave"></div>
+        </div>
+    </div>
+
+    <nav>
+        <div class="logo">3D CRAFT</div>
+        <div class="nav-links">
+            <a href="#products">Каталог</a>
+            <a href="#services">Процес</a>
+            <a href="#contact">Контакти</a>
+        </div>
+    </nav>
+
+    <header class="hero">
+        <h1>Ідеї. Моделювання. Друк.</h1>
+        <p>Створюю унікальні речі з екологічного PLA пластику.</p>
+        <div class="btn-group">
+            <a href="#products" class="btn">Переглянути роботи</a>
+        </div>
+    </header>
+
+    <section id="products">
+        <h2 class="section-title">Каталог виробів</h2>
+        <div class="filter-container">
+            <button class="filter-btn active" onclick="filterSelection('all')">Всі</button>
+            <button class="filter-btn" onclick="filterSelection('org')">Органайзери</button>
+            <button class="filter-btn" onclick="filterSelection('acc')">Аксесуари</button>
+        </div>
+        <div class="grid">
+            <div class="card column org">
+                <div class="card-img"><img src="product1.jpg" alt="Ключниця" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
+                <div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Ключниця "Мапа України"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">450 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
+            </div>
+            <div class="card column acc">
+                <div class="card-img"><img src="product2.jpg" alt="Подушка" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
+                <div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Подушка"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">200 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
+            </div>
+            <div class="card column acc">
+                <div class="card-img"><img src="product3.jpg" alt="Сердце" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
+                <div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Сердце"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">150 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
+            </div>
+            <div class="card column acc">
+                <div class="card-img"><img src="product4.jpg" alt="Кролик" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
+                <div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Кролик"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">150 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
+            </div>
+             <div class="card column acc">
+                <div class="card-img"><img src="product5.jpg" alt="Simple" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
+                <div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Simple"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">100 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
+            </div>
+             <div class="card column org">
+                <div class="card-img"><img src="product6.jpg" alt="Роутер" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
+                <div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Тримач роутера</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">250 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
+            </div>
+            <div class="card column org">
+                <div class="card-img"><img src="product7.jpg" alt="Підставка" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
+                <div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Підставка для ноутбука</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">250 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="services" style="background: #151515;">
+        <h2 class="section-title">Технології</h2>
+        <div class="services-grid">
+            <div class="service-item">
+                <div class="service-icon">⚙️</div>
+                <h3>Fusion 360 Design</h3>
+                <p style="color: #888;">Професійне параметричне моделювання. Розробка функціональних деталей та механізмів з нуля.</p>
+            </div>
+            <div class="service-item">
+                <div class="service-icon">🖨️</div>
+                <h3>Bambu Lab Quality</h3>
+                <p style="color: #888;">Швидкісний друк на Bambu Lab A1. Ідеальні шари, точність розмірів та надійність.</p>
+            </div>
+            <div class="service-item">
+                <div class="service-icon">🌿</div>
+                <h3>PLA Print</h3>
+                <p style="color: #888;">Використовую тільки якісний PLA пластик. Екологічний, безпечний для дому та міцний.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2 class="section-title">Зв'язок</h2>
+        <div style="text-align: center;">
+            <p style="color: #aaa; margin-bottom: 30px;">Моделювання • Друк • Консультації</p>
+            <div class="contact-links">
+                <a href="https://t.me/RockNES" target="_blank">Telegram</a>
+                <a href="https://www.instagram.com/nadrukuy_ka/" target="_blank">Instagram</a>
+                <a href="tel:+380960048939">096 004 89 39</a>
+                <a href="mailto:vanya.sherbaty@gmail.com">Email</a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <p style="color: #444; font-size: 0.8rem;">&copy; 2024 nadrukuy_ka</p>
+    </footer>
+
+    <script>
+        // АВТОМАТИЧНИЙ ЗАПУСК
+        // Ми не чекаємо картинки, а запускаємо таймер одразу, як прочитали код
+        document.addEventListener("DOMContentLoaded", function() {
+            const introScene = document.getElementById('intro-scene');
+            const body = document.body;
+
+            // Ефект трясіння через 1.3 секунди
+            setTimeout(() => {
+                body.classList.add('shake-screen');
+            }, 1300);
+
+            // Видалення заставки через 2.5 секунди
+            setTimeout(() => {
+                introScene.classList.add('hide'); // Додаємо клас з display: none
+                body.classList.add('loaded');     // Вмикаємо скрол
+                body.classList.add('content-reveal'); // Показуємо текст
+                body.classList.remove('shake-screen');
+            }, 2500);
+        });
+
+        // Фільтрація
+        function filterSelection(category) {
+            var cards = document.getElementsByClassName("card");
+            if (category == "all") category = "";
+            for (var i = 0; i < cards.length; i++) {
+                cards[i].classList.remove("hide");
+                if (cards[i].className.indexOf(category) == -1) cards[i].classList.add("hide");
+            }
+            var btns = document.getElementsByClassName("filter-btn");
+            for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+            event.target.classList.add("active");
+        }
+    </script>
+</body>
+</html>
