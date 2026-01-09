@@ -10,13 +10,15 @@
     <style>
         /* --- НАЛАШТУВАННЯ --- */
         :root {
-            --bg-color: #0a0a0a;
+            --bg-color: #050505;
             --card-bg: #1e1e1e;
             --text-main: #e0e0e0;
             --text-secondary: #a0a0a0;
             --accent: #3b82f6;
             --accent-hot: #60a5fa;
-            --retro-pink: #ff00ff; /* Додав трохи ретро-рожевого для музики */
+            --retro-pink: #ff00ff;
+            --retro-purple: #bc13fe;
+            --grid-color: rgba(188, 19, 254, 0.4);
         }
 
         html { scroll-behavior: smooth; }
@@ -31,7 +33,8 @@
             background-color: var(--bg-color);
             color: var(--text-main);
             line-height: 1.6;
-            overflow: hidden; 
+            overflow-x: hidden;
+            position: relative;
         }
         
         body.loaded { overflow-y: auto; }
@@ -40,72 +43,110 @@
         ul { list-style: none; }
 
         /* =========================================
-           МУЗИЧНИЙ ПЛЕЄР (РЕТРОВЕЙВ СТИЛЬ)
+           RETROWAVE WORLD (ФОНОВА АНІМАЦІЯ)
+        ========================================= */
+        .retro-world {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100vh;
+            z-index: -1; /* На задньому плані */
+            overflow: hidden;
+            background: linear-gradient(to bottom, #000000 0%, #1a0b2e 100%);
+            perspective: 400px;
+        }
+
+        /* Сонце (Оновлене) */
+        .retro-sun {
+            position: absolute;
+            top: 25%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px; height: 350px;
+            background: linear-gradient(to bottom, #ffeb3b 0%, #ff00ff 50%, #bc13fe 100%);
+            border-radius: 50%;
+            /* Потужне світіння */
+            box-shadow: 
+                0 0 50px var(--retro-pink),
+                0 0 100px var(--retro-purple),
+                inset 0 0 60px rgba(255, 235, 59, 0.5);
+        }
+
+        /* Рухома сітка */
+        .retro-grid {
+            position: absolute;
+            bottom: -100px; left: -50%;
+            width: 200%; height: 100%;
+            background: 
+                linear-gradient(transparent 0%, var(--grid-color) 2px, transparent 4px),
+                linear-gradient(90deg, transparent 0%, var(--grid-color) 2px, transparent 4px);
+            background-size: 40px 40px;
+            transform: rotateX(70deg);
+            animation: grid-move 1s linear infinite;
+            box-shadow: 0 0 50px var(--retro-purple);
+            opacity: 0.6;
+        }
+
+        @keyframes grid-move {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 40px; }
+        }
+
+        /* Машинка (Оновлена анімація руху вправо) */
+        .retro-car {
+            position: fixed;
+            bottom: 30px;
+            left: -300px; /* Початкова позиція за лівим краєм */
+            width: 220px; 
+            z-index: 1; /* Перед фоном, але за контентом */
+            opacity: 1;
+            pointer-events: none;
+            /* Анімація: рух через весь екран за 20 секунд, нескінченно */
+            animation: car-drive-across 20s linear infinite;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
+        }
+
+        @keyframes car-drive-across {
+            0% {
+                left: -300px;
+                transform: translateY(0);
+            }
+            /* Додаємо легке похитування під час руху */
+            10%, 30%, 50%, 70%, 90% { transform: translateY(3px); }
+            20%, 40%, 60%, 80% { transform: translateY(0); }
+            
+            100% {
+                left: 110%; /* Кінцева позиція за правим краєм */
+                transform: translateY(0);
+            }
+        }
+
+
+        /* =========================================
+           МУЗИЧНИЙ ПЛЕЄР
         ========================================= */
         .music-player {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(10, 10, 10, 0.8);
-            backdrop-filter: blur(5px);
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: 1px solid var(--accent);
-            cursor: pointer;
-            transition: all 0.3s ease;
+            position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(5px);
+            padding: 10px 20px; border-radius: 30px; border: 1px solid var(--accent);
+            cursor: pointer; transition: all 0.3s ease;
             box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
         }
-
-        .music-player:hover {
-            border-color: var(--retro-pink);
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
-        }
-
-        .music-text {
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #fff;
-        }
-
-        /* Еквалайзер (анімовані смужки) */
-        .equalizer {
-            display: flex;
-            gap: 3px;
-            height: 15px;
-            align-items: flex-end;
-        }
-
-        .bar-eq {
-            width: 3px;
-            background-color: var(--accent);
-            height: 5px;
-            transition: 0.2s;
-        }
-
-        /* Анімація, коли музика грає */
-        .music-player.playing .bar-eq {
-            background-color: var(--retro-pink);
-            animation: equalizer-dance 0.5s infinite ease-in-out alternate;
-        }
+        .music-player:hover { border-color: var(--retro-pink); box-shadow: 0 0 15px rgba(255, 0, 255, 0.5); }
         
+        .music-text { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; color: #fff; white-space: nowrap; }
+        
+        .equalizer { display: flex; gap: 3px; height: 15px; align-items: flex-end; }
+        .bar-eq { width: 3px; background-color: var(--accent); height: 5px; transition: 0.2s; }
+        
+        .music-player.playing .bar-eq { background-color: var(--retro-pink); animation: eq-dance 0.5s infinite ease-in-out alternate; }
         .music-player.playing .bar-eq:nth-child(1) { animation-delay: 0s; }
         .music-player.playing .bar-eq:nth-child(2) { animation-delay: 0.2s; }
         .music-player.playing .bar-eq:nth-child(3) { animation-delay: 0.4s; }
         .music-player.playing .bar-eq:nth-child(4) { animation-delay: 0.1s; }
 
-        @keyframes equalizer-dance {
-            0% { height: 3px; }
-            100% { height: 15px; }
-        }
+        @keyframes eq-dance { 0% { height: 3px; } 100% { height: 15px; } }
 
         /* =========================================
-           АНІМАЦІЯ "МЕТЕОР"
+           ВСТУПНА АНІМАЦІЯ
         ========================================= */
         #intro-scene {
             position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
@@ -113,7 +154,6 @@
             display: flex; justify-content: center; align-items: center;
             perspective: 1000px; overflow: hidden; transition: opacity 0.5s ease-out;
         }
-
         #intro-scene.hide { opacity: 0; visibility: hidden; display: none !important; }
 
         .impact-container {
@@ -123,55 +163,27 @@
             animation: meteor-fall 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
         }
 
-        .meteor-cube {
-            width: 60px; height: 60px; position: relative;
-            transform-style: preserve-3d; animation: meteor-spin 1.5s linear forwards;
-        }
-
+        .meteor-cube { width: 60px; height: 60px; position: relative; transform-style: preserve-3d; animation: meteor-spin 1.5s linear forwards; }
         .m-face {
             position: absolute; width: 60px; height: 60px;
             background: rgba(59, 130, 246, 0.2); border: 2px solid var(--accent-hot);
             box-shadow: 0 0 30px rgba(59, 130, 246, 0.8), inset 0 0 20px rgba(59, 130, 246, 0.5);
         }
-
-        .mf-front  { transform: translateZ(30px); }
-        .mf-back   { transform: rotateY(180deg) translateZ(30px); }
-        .mf-right  { transform: rotateY(90deg) translateZ(30px); }
-        .mf-left   { transform: rotateY(-90deg) translateZ(30px); }
-        .mf-top    { transform: rotateX(90deg) translateZ(30px); }
-        .mf-bottom { transform: rotateX(-90deg) translateZ(30px); }
+        .mf-front { transform: translateZ(30px); } .mf-back { transform: rotateY(180deg) translateZ(30px); }
+        .mf-right { transform: rotateY(90deg) translateZ(30px); } .mf-left { transform: rotateY(-90deg) translateZ(30px); }
+        .mf-top { transform: rotateX(90deg) translateZ(30px); } .mf-bottom { transform: rotateX(-90deg) translateZ(30px); }
 
         .shockwave {
-            position: absolute; width: 20px; height: 20px;
-            background: transparent; border: 5px solid var(--accent-hot); border-radius: 50%;
-            opacity: 0; transform: rotateX(70deg) translateZ(-50px);
-            animation: shockwave-expand 1s ease-out 1.3s forwards;
+            position: absolute; width: 20px; height: 20px; background: transparent;
+            border: 5px solid var(--accent-hot); border-radius: 50%; opacity: 0;
+            transform: rotateX(70deg) translateZ(-50px); animation: shockwave-expand 1s ease-out 1.3s forwards;
         }
 
-        @keyframes meteor-fall {
-            0% { transform: translateY(-800px) scale(0.5); opacity: 0; }
-            80% { transform: translateY(0) scale(1); opacity: 1; }
-            90% { transform: translateY(-20px); }
-            100% { transform: translateY(0); }
-        }
-
-        @keyframes meteor-spin {
-            0% { transform: rotateX(0) rotateY(0) rotateZ(0); }
-            100% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg); }
-        }
-
-        @keyframes shockwave-expand {
-            0% { width: 20px; height: 20px; opacity: 1; border-width: 5px; }
-            100% { width: 500px; height: 500px; opacity: 0; border-width: 20px; }
-        }
-
+        @keyframes meteor-fall { 0% { transform: translateY(-800px) scale(0.5); opacity: 0; } 80% { transform: translateY(0) scale(1); opacity: 1; } 90% { transform: translateY(-20px); } 100% { transform: translateY(0); } }
+        @keyframes meteor-spin { 0% { transform: rotateX(0) rotateY(0) rotateZ(0); } 100% { transform: rotateX(720deg) rotateY(360deg) rotateZ(180deg); } }
+        @keyframes shockwave-expand { 0% { width: 20px; height: 20px; opacity: 1; border-width: 5px; } 100% { width: 500px; height: 500px; opacity: 0; border-width: 20px; } }
         .shake-screen { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both 1.3s; }
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-2px, 0, 0); }
-            20%, 80% { transform: translate3d(4px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-6px, 0, 0); }
-            40%, 60% { transform: translate3d(6px, 0, 0); }
-        }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-6px, 0, 0); } 40%, 60% { transform: translate3d(6px, 0, 0); } }
 
         /* =========================================
            ОСНОВНИЙ САЙТ
@@ -179,18 +191,13 @@
         nav {
             display: flex; justify-content: space-between; align-items: center;
             padding: 10px 5%; position: fixed; width: 100%;
-            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(10px);
-            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05);
-            height: 80px;
+            background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px);
+            z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.05); height: 80px;
         }
-
         .logo-container { display: flex; align-items: center; z-index: 1002; }
-        .logo-img {
-            height: 55px; width: auto; transition: all 0.4s ease;
-            filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.3)); 
-        }
+        .logo-img { height: 55px; width: auto; transition: all 0.4s ease; filter: drop-shadow(0 0 2px rgba(59, 130, 246, 0.3)); }
         .logo-img:hover { transform: scale(1.1); filter: drop-shadow(0 0 10px var(--accent)); }
-
+        
         .nav-links { display: flex; align-items: center; }
         .nav-links a { margin-left: 30px; font-size: 0.9rem; color: var(--text-secondary); }
         .nav-links a:hover { color: #fff; text-shadow: 0 0 10px var(--accent); }
@@ -200,23 +207,24 @@
 
         .hero {
             height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; background: radial-gradient(circle at center, #1a1a1a 0%, #0a0a0a 80%); padding: 0 20px;
+            text-align: center; padding: 0 20px;
+            background: transparent; 
         }
         .hero h1 {
             font-size: 4rem; margin-bottom: 20px; line-height: 1.1;
             background: linear-gradient(90deg, #fff, var(--accent));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            opacity: 0;
+            opacity: 0; text-shadow: 0 0 20px rgba(0,0,0,0.8);
         }
         .hero p {
             font-size: 1.2rem; color: var(--text-secondary); max-width: 600px; margin-bottom: 40px; opacity: 0;
+            text-shadow: 0 0 10px rgba(0,0,0,1);
         }
         .btn-group { opacity: 0; }
 
         .content-reveal .hero h1 { animation: fadeUp 1s ease forwards 0.2s; }
         .content-reveal .hero p { animation: fadeUp 1s ease forwards 0.5s; }
         .content-reveal .btn-group { animation: fadeUp 1s ease forwards 0.8s; }
-
         @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
         .btn {
@@ -226,7 +234,10 @@
         }
         .btn:hover { transform: translateY(-3px); box-shadow: 0 0 30px var(--accent-hot); }
         
-        section { padding: 100px 5%; }
+        section { padding: 100px 5%; position: relative; z-index: 2; }
+        /* Напівпрозорий фон для секцій, щоб текст читався */
+        #products, #services, #contact { background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(10px); border-top: 1px solid #222; }
+
         .section-title { text-align: center; font-size: 2.5rem; margin-bottom: 40px; color: #fff; }
         
         .filter-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 50px; flex-wrap: wrap; }
@@ -234,15 +245,10 @@
             background: transparent; border: 1px solid #333; color: var(--text-secondary);
             padding: 8px 25px; border-radius: 20px; cursor: pointer; transition: 0.3s; font-size: 1rem;
         }
-        .filter-btn.active, .filter-btn:hover {
-            background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-        }
+        .filter-btn.active, .filter-btn:hover { background: var(--accent); border-color: var(--accent); color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
 
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
-        .card {
-            background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; transition: 0.4s;
-            opacity: 1; transform: scale(1);
-        }
+        .card { background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid #333; transition: 0.4s; opacity: 1; transform: scale(1); }
         .card.hide { display: none; }
         .card:hover { border-color: var(--accent); transform: translateY(-5px); }
         .card-img { height: 220px; background: #222; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -254,18 +260,12 @@
         .card-price { font-size: 1.1rem; font-weight: bold; color: #fff; float: right; }
         
         .services-grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
-        .service-item {
-            flex: 1 1 300px; background: #1a1a1a; padding: 40px; border-radius: 15px;
-            text-align: center; border-bottom: 3px solid transparent; transition: 0.3s;
-        }
+        .service-item { flex: 1 1 300px; background: #1a1a1a; padding: 40px; border-radius: 15px; text-align: center; border-bottom: 3px solid transparent; transition: 0.3s; }
         .service-item:hover { border-bottom-color: var(--accent); background: #222; }
         .service-icon { font-size: 2rem; color: var(--accent); margin-bottom: 20px; }
 
-        .footer { background: #050505; padding: 50px 5%; text-align: center; border-top: 1px solid #222; }
-        .contact-links a {
-            display: inline-block; margin: 10px; padding: 10px 25px;
-            border: 1px solid #333; border-radius: 50px; color: #aaa;
-        }
+        .footer { background: #050505; padding: 50px 5%; text-align: center; border-top: 1px solid #222; position: relative; z-index: 2; }
+        .contact-links a { display: inline-block; margin: 10px; padding: 10px 25px; border: 1px solid #333; border-radius: 50px; color: #aaa; }
         .contact-links a:hover { border-color: var(--accent); color: #fff; background: var(--accent); }
 
         @media (max-width: 768px) {
@@ -278,8 +278,7 @@
                 position: fixed; left: -100%; top: 80px; gap: 0;
                 flex-direction: column; background-color: #111;
                 width: 100%; height: calc(100vh - 80px);
-                text-align: center; transition: 0.3s;
-                padding-top: 50px; border-top: 1px solid #333;
+                text-align: center; transition: 0.3s; padding-top: 50px; border-top: 1px solid #333;
             }
             .nav-links.active { left: 0; }
             .nav-links a { margin: 25px 0; font-size: 1.5rem; display: block; }
@@ -294,10 +293,25 @@
             .card-img { height: 250px; }
             .contact-links { display: flex; flex-direction: column; padding: 0 40px; }
             .contact-links a { margin: 5px 0; text-align: center; width: 100%; }
+
+            /* Міні-плеєр */
+            .music-player { padding: 8px; border-radius: 50%; width: 45px; height: 45px; justify-content: center; bottom: 15px; right: 15px; }
+            .music-text { display: none; } .equalizer { gap: 2px; } .bar-eq { width: 2px; }
+            
+            /* Машинка менша на телефоні */
+            .retro-car { width: 150px; bottom: 40px; }
+            .retro-sun { width: 250px; height: 250px; top: 20%; }
         }
     </style>
 </head>
 <body>
+
+    <div class="retro-world">
+        <div class="retro-sun"></div>
+        <div class="retro-grid"></div>
+    </div>
+
+    <img src="car.png" alt="Retro Car" class="retro-car" onerror="this.style.display='none'">
 
     <audio id="bg-music" loop>
         <source src="music.mp3" type="audio/mpeg">
@@ -305,10 +319,7 @@
 
     <div class="music-player" onclick="toggleMusic()">
         <div class="equalizer">
-            <div class="bar-eq"></div>
-            <div class="bar-eq"></div>
-            <div class="bar-eq"></div>
-            <div class="bar-eq"></div>
+            <div class="bar-eq"></div><div class="bar-eq"></div><div class="bar-eq"></div><div class="bar-eq"></div>
         </div>
         <span class="music-text" id="music-text">Play Music</span>
     </div>
@@ -328,13 +339,9 @@
         <a href="#" class="logo-container">
             <img src="logo.png" alt="3D Craft Logo" class="logo-img">
         </a>
-        
         <div class="hamburger" onclick="toggleMenu()">
-            <span class="bar"></span>
-            <span class="bar"></span>
-            <span class="bar"></span>
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span>
         </div>
-
         <div class="nav-links">
             <a href="#products" onclick="toggleMenu()">Каталог</a>
             <a href="#services" onclick="toggleMenu()">Технології</a>
@@ -345,7 +352,6 @@
     <header class="hero">
         <h1>Ідеї. Моделювання. Друк.</h1>
         <p>Створюю унікальні речі з PLA пластику.</p>
-        <p>Від ідеї до готового виробу.</p>
         <div class="btn-group">
             <a href="#products" class="btn">Переглянути роботи</a>
         </div>
@@ -359,55 +365,22 @@
             <button class="filter-btn" onclick="filterSelection('acc')">Аксесуари</button>
         </div>
         <div class="grid">
-            <div class="card column org">
-                <div class="card-img"><img src="product1.jpg" alt="Ключниця" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
-                <div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Ключниця "Мапа України"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">450 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
-            </div>
-            <div class="card column acc">
-                <div class="card-img"><img src="product2.jpg" alt="Подушка" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
-                <div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Подушка"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">200 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
-            </div>
-            <div class="card column acc">
-                <div class="card-img"><img src="product3.jpg" alt="Сердце" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
-                <div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Сердце"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">150 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
-            </div>
-            <div class="card column acc">
-                <div class="card-img"><img src="product4.jpg" alt="Кролик" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
-                <div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Кролик"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">150 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
-            </div>
-             <div class="card column acc">
-                <div class="card-img"><img src="product5.jpg" alt="Simple" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
-                <div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Simple"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">100 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
-            </div>
-             <div class="card column org">
-                <div class="card-img"><img src="product6.jpg" alt="Роутер" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
-                <div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Тримач роутера</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">250 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
-            </div>
-            <div class="card column org">
-                <div class="card-img"><img src="product7.jpg" alt="Підставка" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div>
-                <div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Підставка для ноутбука</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">500 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div>
-            </div>
+            <div class="card column org"><div class="card-img"><img src="product1.jpg" alt="Ключниця" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div><div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Ключниця "Мапа України"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">450 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div></div>
+            <div class="card column acc"><div class="card-img"><img src="product2.jpg" alt="Подушка" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div><div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Подушка"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">200 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div></div>
+            <div class="card column acc"><div class="card-img"><img src="product3.jpg" alt="Сердце" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div><div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Сердце"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">150 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div></div>
+            <div class="card column acc"><div class="card-img"><img src="product4.jpg" alt="Кролик" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div><div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Кролик"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">150 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div></div>
+            <div class="card column acc"><div class="card-img"><img src="product5.jpg" alt="Simple" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div><div class="card-content"><span class="card-cat">Аксесуари</span><h3 class="card-title">Підставка "Simple"</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">100 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div></div>
+            <div class="card column org"><div class="card-img"><img src="product6.jpg" alt="Роутер" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div><div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Тримач роутера</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">250 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div></div>
+            <div class="card column org"><div class="card-img"><img src="product7.jpg" alt="Підставка" onerror="this.src='https://via.placeholder.com/300/1e1e1e/333?text=No+Photo'"></div><div class="card-content"><span class="card-cat">Органайзери</span><h3 class="card-title">Підставка для ноутбука</h3><div style="display: flex; justify-content: space-between; align-items: center;"><span class="card-price">500 грн</span><a href="https://t.me/RockNES" class="btn" style="padding: 5px 15px; font-size: 0.8rem;">Купити</a></div></div></div>
         </div>
     </section>
 
-    <section id="services" style="background: #151515;">
+    <section id="services">
         <h2 class="section-title">Технології</h2>
         <div class="services-grid">
-            <div class="service-item">
-                <div class="service-icon">⚙️</div>
-                <h3>Fusion 360 Design</h3>
-                <p style="color: #888;">Професійне параметричне моделювання. Розробка функціональних деталей та механізмів з нуля.</p>
-            </div>
-            <div class="service-item">
-                <div class="service-icon">🖨️</div>
-                <h3>Bambu Lab Quality</h3>
-                <p style="color: #888;">Швидкісний друк на Bambu Lab A1. Ідеальні шари, точність розмірів та надійність.</p>
-            </div>
-            <div class="service-item">
-                <div class="service-icon">🌿</div>
-                <h3>PLA Print</h3>
-                <p style="color: #888;">Використовую тільки якісний PLA пластик. Екологічний, безпечний для дому та міцний.</p>
-            </div>
+            <div class="service-item"><div class="service-icon">⚙️</div><h3>Fusion 360 Design</h3><p style="color: #888;">Професійне параметричне моделювання. Розробка функціональних деталей та механізмів з нуля.</p></div>
+            <div class="service-item"><div class="service-icon">🖨️</div><h3>Bambu Lab Quality</h3><p style="color: #888;">Швидкісний друк на Bambu Lab A1. Ідеальні шари, точність розмірів та надійність.</p></div>
+            <div class="service-item"><div class="service-icon">🌿</div><h3>PLA Print</h3><p style="color: #888;">Використовую тільки якісний PLA пластик. Екологічний, безпечний для дому та міцний.</p></div>
         </div>
     </section>
 
@@ -430,13 +403,11 @@
 
     <script>
         function toggleMenu() {
-            const menu = document.querySelector(".nav-links");
-            const icon = document.querySelector(".hamburger");
-            menu.classList.toggle("active");
-            icon.classList.toggle("active");
+            document.querySelector(".nav-links").classList.toggle("active");
+            document.querySelector(".hamburger").classList.toggle("active");
         }
 
-        // Керування музикою
+        // --- МУЗИКА І АВТОЗАПУСК ---
         function toggleMusic() {
             const music = document.getElementById("bg-music");
             const player = document.querySelector(".music-player");
@@ -453,22 +424,6 @@
             }
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const introScene = document.getElementById('intro-scene');
-            const body = document.body;
-
-            setTimeout(() => {
-                body.classList.add('shake-screen');
-            }, 1300);
-
-            setTimeout(() => {
-                introScene.classList.add('hide'); 
-                body.classList.add('loaded');     
-                body.classList.add('content-reveal'); 
-                body.classList.remove('shake-screen');
-            }, 2500);
-        });
-
         function filterSelection(category) {
             var cards = document.getElementsByClassName("card");
             if (category == "all") category = "";
@@ -480,7 +435,41 @@
             for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
             event.target.classList.add("active");
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const introScene = document.getElementById('intro-scene');
+            const body = document.body;
+            const music = document.getElementById("bg-music");
+            const player = document.querySelector(".music-player");
+
+            // Спроба автозапуску музики
+            var playPromise = music.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Автозапуск спрацював!
+                    player.classList.add("playing");
+                    document.getElementById("music-text").innerText = "Playing...";
+                }).catch(error => {
+                    // Автозапуск заблоковано браузером.
+                    // Додаємо слухач на перший клік по сторінці, щоб запустити музику
+                    console.log("Autoplay prevented. Waiting for interaction.");
+                    document.addEventListener('click', function startMusicOnClick() {
+                        music.play();
+                        player.classList.add("playing");
+                        document.getElementById("music-text").innerText = "Playing...";
+                        document.removeEventListener('click', startMusicOnClick); // Видаляємо слухач після першого разу
+                    }, { once: true });
+                });
+            }
+
+            setTimeout(() => { body.classList.add('shake-screen'); }, 1300);
+            setTimeout(() => {
+                introScene.classList.add('hide'); 
+                body.classList.add('loaded');     
+                body.classList.add('content-reveal'); 
+                body.classList.remove('shake-screen');
+            }, 2500);
+        });
     </script>
 </body>
 </html>
-
